@@ -24,6 +24,7 @@ class ContaCorrente:
         self.agencia = '0001'
         self.saldo = 0
         self.extrato = []
+        self.saques = 0
     
     def get_agencia(self):
         return self.agencia
@@ -36,3 +37,9 @@ class ContaCorrente:
     
     def get_saldo(self):
         return self.saldo
+    
+    def get_saques(self):
+        return self.saques
+    
+    def set_saques(self):
+        self.saques+=1

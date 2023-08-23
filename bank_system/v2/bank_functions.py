@@ -116,7 +116,7 @@ def depositar(cliente,base_clientes):
             deposito = float(deposito)
             if deposito > 0:
                 base_clientes[cliente].contas[conta_corrente_selecionada].saldo += deposito
-                base_clientes[cliente].contas[conta_corrente_selecionada].extrato.append(f"deposito: +R$ {deposito:.2f}")
+                base_clientes[cliente].contas[conta_corrente_selecionada].extrato.append(f'deposito: +R$ {deposito:.2f}')
                 print('operação realizada com sucesso')
                 time.sleep(1)
             else:
@@ -124,8 +124,69 @@ def depositar(cliente,base_clientes):
                 time.sleep(1)
         except ValueError:
             print('ERROR - você informou um valor inválido para depósito, tente novamente -')
+# função para verificar a quantidade de sques realizada na conta
+def permite_sacar(quantidade_limite_saques,ContaCorrente):
+    if ContaCorrente.get_saques() >= quantidade_limite_saques:
+        print('ERROR: limite de saques excedido')
+        time.sleep(1)
+        return False
+    else:
+        return True
+    
+
+# função saque
+def sacar(**kwargs):
+    #buscar cliente e conta corrente na base de dados
+    if kwargs['cliente'] == None:
+        return
+    if listar_contas_correntes(kwargs['base_clientes'][kwargs['cliente']]):
+        existe_conta, conta_corrente_selecionada = buscar_conta_corrente(kwargs['base_clientes'][kwargs['cliente']])
+    else:
+        return
+    #operar o saque se a conta selecionada existir
+    if existe_conta:
+        if permite_sacar(kwargs['quantidade_limite_saques'],kwargs['base_clientes'][kwargs['cliente']].contas[conta_corrente_selecionada]):
+            saque = input('saque: informe valor a ser retirado (0 para voltar) -> ')
+            # Validação que não foi digitada uma letra
+            try:
+                saque = float(saque)
+                if saque > kwargs['valor_limite_saque']:
+                    print('ERROR: valor acima do limite permitido de saques')
+                    time.sleep(2)
+                    return
+                elif saque > 0 and saque <= kwargs['base_clientes'][kwargs['cliente']].contas[conta_corrente_selecionada].get_saldo():
+                    kwargs['base_clientes'][kwargs['cliente']].contas[conta_corrente_selecionada].saldo -= saque
+                    kwargs['base_clientes'][kwargs['cliente']].contas[conta_corrente_selecionada].extrato.append(f'saque: -R$ {saque:.2f}')
+                    kwargs['base_clientes'][kwargs['cliente']].contas[conta_corrente_selecionada].set_saques()
+                    print('operação realizada com sucesso')
+                    time.sleep(1)
+                    return
+                elif saque > kwargs['base_clientes'][kwargs['cliente']].contas[conta_corrente_selecionada].get_saldo():
+                    print('ERROR: saldo insuficiente para realizar operação')
+                    time.sleep(1)
+                    return
+                else:
+                    print('retornando ao menu inicial')
+                    time.sleep(1)
+            except ValueError:
+                print('ERROR - você informou um valor inválido para saque, tente novamente -')
+                return
+        
+
+
+
+
+
+
+
+
+
+
 #função extrato de todos os clientes
 def extrato_geral(base_clientes):
+    saldo_total_cliente = 0
+    saldo_total_base_clientes =0 
+    print(': EXTRATO GERAL DE CONTAS :')
     for cliente in base_clientes:
         print(f'- cliente: {cliente.get_nome()} - CPF: {cliente.get_cpf()}')
         if len(cliente.get_contas())>0:
@@ -133,7 +194,11 @@ def extrato_geral(base_clientes):
                 print(f'-- Agencia: {conta.get_agencia()} - CC: {conta.get_numero_conta_corrente()}')
                 for operacao in conta.get_extrato():
                     print(f'--- {operacao}')
-                print(f'------- saldo atual: R$ {conta.saldo:.2f}')
+                print(f'---- saldo atual: R$ {conta.get_saldo():.2f}')
+                saldo_total_cliente += conta.get_saldo()
+        saldo_total_base_clientes += saldo_total_cliente
+    print(f'===== SALDO TOTAL CLIENTES: R$ {saldo_total_base_clientes:.2f}')
+    time.sleep(3)
                 
 #função extrato de um cliente
 def extrato(cliente):
@@ -147,6 +212,7 @@ def extrato(cliente):
                 print(f'--- {operacao}')
             print(f'---- saldo atual: R$ {conta.get_saldo():.2f}')
         print(f'::: saldo total do cliente: R$ {saldo_total:.2f}')
+    time.sleep(2)
 # menu inicial        
 def menu_inicial():
     date = time.strftime("%d/%m/%Y")

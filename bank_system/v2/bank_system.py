@@ -8,7 +8,6 @@ quantidade_saques = 0
 base_clientes = []
 numero_conta_inicial = 0
 
-
 # iniciar a base de clientes com algumas contas para teste
 base_teste_clientes = bf.criar_base_teste()
 for cliente in base_teste_clientes:
@@ -25,21 +24,17 @@ while True:
     # Lógica de cadastro de novo cliente
     if option == '1':
         base_clientes.append(bf.criar_usuario(base_clientes))
-    
     # Lógica de cadastro de conta corrente
     elif option == '2':
         numero_conta_inicial = bf.criar_conta_corrente(numero_inicial_conta_corrente=numero_conta_inicial, base_clientes=base_clientes)
-
     # Listar clientes cadastrados
     elif option == '3':
         bf.listar_clientes(base_clientes)
-        
-    
     # Operações de conta    
     elif option == '4':
-        
+        # Verificar se o cliente existe na base
         existe_cliente, cliente = bf.buscar_cliente(base_clientes=base_clientes)
-        
+        # seguir com submenu
         if existe_cliente:
             while True:
                 second_option = bf.sub_menu(base_clientes[cliente])
@@ -47,7 +42,7 @@ while True:
                 if second_option == 'D':
                     bf.depositar(cliente,base_clientes)
                 elif second_option == 'S':
-                    print('')
+                    bf.sacar(cliente=cliente,base_clientes=base_clientes,quantidade_limite_saques=LIMITE_SAQUE_QUANTIDADE,valor_limite_saque=LIMITE_SAQUE_VALOR)
                 elif second_option == 'E':
                     bf.extrato(cliente=base_clientes[cliente])
                 elif second_option == 'V':
@@ -59,14 +54,14 @@ while True:
                     time.sleep(1)
         else:
             print('ERROR: cliente não identificado')
-        
-
-    
     # Opção de encerrar a aplicação
     elif option == '0':
         print('aplicação encerrada')
         time.sleep(0.5)
         break
+    # Opção secreta para listar todos os clientes e extratos de conta
+    elif option == '999':
+        bf.extrato_geral(base_clientes)
     # Mensagem de opção errada
     else:
         print('ERROR - opção inválida, escolha uma das opções disponíveis -')
